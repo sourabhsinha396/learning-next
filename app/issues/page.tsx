@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import createIssueSchema from '@/app/schemas';
 import ErrorMessage from '@/components/errors/ErrorMessage';
+import Spinner from '@/components/mini/spinner';
 
 
 const SimpleMDE = dynamic(() => import('react-simplemde-editor'), {
@@ -29,11 +30,14 @@ const Issues = () => {
         resolver: zodResolver(createIssueSchema),
     });
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
     const [alertTitle, setAlertTitle] = useState('');
     const [alertDescription, setAlertDescription] = useState('');
 
     const onSubmit = async (data: IssueForm) => {
         try {
+            setLoading(true);
+            console.log("Loading:", loading);
             console.log('Submitting the form:', data);
             const response = await axios.post('https://api.example.com/aiinterview', data);
             console.log('Response:', response.data);
@@ -63,7 +67,9 @@ const Issues = () => {
                     render={({ field }) => <SimpleMDE placeholder='What is the issue?' {...field} />}
                 />
                 <ErrorMessage>{errors.description?.message}</ErrorMessage>
-                <Button className='mt-4'>Submit</Button>
+                <Button className='mt-4'>
+                    {loading ? <Spinner /> : 'Submit'}
+                </Button>
             </form>
         </>
     )
