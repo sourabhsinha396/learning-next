@@ -1,78 +1,51 @@
 'use client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import dynamic from 'next/dynamic'
-import { useForm, Controller } from 'react-hook-form';
-import axios from 'axios';
 import { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import z from 'zod';
+import { useEffect } from 'react';
+import axios from 'axios'
+
+import { Table, TableHeader, TableBody, TableRow } from '@/components/ui/table';
 
 
-import 'easymde/dist/easymde.min.css'
-import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import createIssueSchema from '@/app/schemas';
-import ErrorMessage from '@/components/errors/ErrorMessage';
-import Spinner from '@/components/mini/spinner';
+interface Issue {
+    title: string;
+    description: string;
+}
 
+const IssueList = () => {
+    const [issues, setIssues] = useState<Issue[]>([]);
+    const [loading, setLoading] = useState(true);
 
-const SimpleMDE = dynamic(() => import('react-simplemde-editor'), {
-    ssr: false,
-    loading: () => <p>Loading...</p>  // Optional: to show a loading message while the component loads
-})
-
-type IssueForm = z.infer<typeof createIssueSchema>;
-
-
-const Issues = () => {
-    const { register, control, handleSubmit, formState: { errors } } = useForm<IssueForm>({
-        resolver: zodResolver(createIssueSchema),
-    });
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [alertTitle, setAlertTitle] = useState('');
-    const [alertDescription, setAlertDescription] = useState('');
-
-    const onSubmit = async (data: IssueForm) => {
-        try {
-            setLoading(true);
-            console.log("Loading:", loading);
-            console.log('Submitting the form:', data);
-            const response = await axios.post('https://api.example.com/aiinterview', data);
-            console.log('Response:', response.data);
-            router.push('/');
-        } catch (error) {
-            console.error('Error submitting the form:', error);
-            setAlertTitle('Error');
-            setAlertDescription('There was an error submitting the form. Please try again later.');
+    useEffect(() => {
+        const fetchIssues = async () => {
+            const response = await axios.get('https://mocki.io/v1/9319ba91-16ee-447f-a29b-2b1b24d37da5');
+            setIssues(response.data);
+            setLoading(false);
         }
-    };
+        fetchIssues();
+    }, []);
+
 
     return (
-        <>
-            {alertTitle && alertDescription && (
-                <Alert variant="custom" className='mx-auto'>
-                    <AlertTitle>{alertTitle}</AlertTitle>
-                    <AlertDescription>{alertDescription}</AlertDescription>
-                </Alert>
-            )}
-            <form className='w-6/12 mx-auto' onSubmit={handleSubmit(onSubmit)}>
-                <h1 className='font-extrabold tracking-normal text-gray-700'>Report an Issue</h1>
-                <Input placeholder='Title' className='my-4' {...register('title')} />
-                <ErrorMessage>{errors.title?.message}</ErrorMessage>
-                <Controller
-                    name='description'
-                    control={control}
-                    render={({ field }) => <SimpleMDE placeholder='What is the issue?' {...field} />}
-                />
-                <ErrorMessage>{errors.description?.message}</ErrorMessage>
-                <Button className='mt-4'>
-                    {loading ? <Spinner /> : 'Submit'}
-                </Button>
-            </form>
-        </>
+        <div className="p-6 w-8/12 mx-auto">
+            <h1 className="text-3xl font-extrabold text-gray-700 mb-4">Issues</h1>
+            <table className="table-auto border-collapse bg-white shadow-lg rounded-lg overflow-hidden">
+                <thead className="bg-gray-200 text-gray-600">
+                    <tr>
+                        <th className="py-2 px-4 text-left">Title</th>
+                        <th className="py-2 px-4 text-left">Description</th>
+                    </tr>
+                </thead>
+                <tbody className="text-gray-800">
+                    {issues.map((issue, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                            <td className="py-2 px-4">{issue.title}</td>
+                            <td className="py-2 px-4">{issue.description}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     )
 }
 
-export default Issues
+export default IssueList
