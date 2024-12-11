@@ -1,33 +1,21 @@
 'use client'
+import React from 'react'
 import { useState } from 'react';
-import { useEffect } from 'react';
-import axios from 'axios'
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-import { Table, TableHeader, TableBody, TableRow } from '@/components/ui/table';
-
-
-interface Issue {
-    title: string;
-    description: string;
-}
-
-const IssueList = () => {
-    const [issues, setIssues] = useState<Issue[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchIssues = async () => {
-            const response = await axios.get('https://run.mocky.io/v3/b451e189-bcf6-4b9e-b545-dfebc9f4fa1d');
-            setIssues(response.data);
-            setLoading(false);
-        }
-        fetchIssues();
-    }, []);
-
+const LoadingIssues = () => {
+    const [issues, setIssues] = useState([
+        'Issue 1',
+        'Issue 2',
+        'Issue 3',
+        'Issue 4',
+    ]);
 
     return (
         <div className="p-6 w-8/12 mx-auto">
             <h1 className="text-3xl font-extrabold text-gray-700 mb-4">Issues</h1>
+            <p>Loading...</p>
             <table className="table-auto border-collapse bg-white shadow-lg rounded-lg overflow-hidden">
                 <thead className="bg-gray-200 text-gray-600">
                     <tr>
@@ -38,8 +26,8 @@ const IssueList = () => {
                 <tbody className="text-gray-800">
                     {issues.map((issue, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                            <td className="py-2 px-4">{issue.title}</td>
-                            <td className="py-2 px-4">{issue.description}</td>
+                            <Skeleton />
+                            <Skeleton />
                         </tr>
                     ))}
                 </tbody>
@@ -48,4 +36,4 @@ const IssueList = () => {
     )
 }
 
-export default IssueList
+export default LoadingIssues
